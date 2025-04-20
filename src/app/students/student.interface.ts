@@ -1,4 +1,4 @@
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 
 export type Guardian = {
   fatherName: string;
@@ -24,7 +24,6 @@ export type LocalGuardian = {
 
 export type StudentInterface = {
   id: string;
-  password: string;
   name: UserName;
   gender: 'male' | 'female';
   dateOfBirth?: string;
@@ -37,8 +36,8 @@ export type StudentInterface = {
   guardian: Guardian;
   localGuardian: LocalGuardian;
   profileImg?: string;
-  isActive: 'active' | 'blocked';
   isDeleted:boolean;
+  user:Types.ObjectId
 };
 
 

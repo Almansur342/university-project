@@ -1,5 +1,5 @@
 import { model, Schema } from 'mongoose';
-import bcrypt from 'bcrypt';
+
 import {
   Guardian,
   LocalGuardian,
@@ -74,10 +74,6 @@ const studentSchema = new Schema<StudentInterface, StudentModel>({
     type: String,
     required: true,
   },
-  password:{
-    type:String,
-    required: true,
-  },
   name: userNameSchema,
   gender: {
     type: String,
@@ -117,30 +113,19 @@ const studentSchema = new Schema<StudentInterface, StudentModel>({
   profileImg: {
     type: String,
   },
-  isActive: {
-    type: String,
-    enum: ['active', 'blocked'],
-    required: true,
-  },
   isDeleted:{
     type:Boolean,
     default: false,
+  },
+  user:{
+    type:Schema.Types.ObjectId,
+    required: true,
+    unique: true,
+    ref:'User'
   }
 });
 
 // pre save middleware/hook
-studentSchema.pre('save', async function(next){
-  //hashing password
-  const student = this; //document, all the data
- student.password = await bcrypt.hash(student.password,Number(config.bcrypt_salt_round));
- next();
-})
-
-// post save middleware
-studentSchema.post('save', function(doc,next){
-  doc.password='';
-  next();
-})
 
 studentSchema.pre('find', async function (next) {
   this.find({isDeleted:{$ne:true}});
