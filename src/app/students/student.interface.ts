@@ -1,3 +1,5 @@
+import { Model } from "mongoose";
+
 export type Guardian = {
   fatherName: string;
   fatherOccupation: string;
@@ -22,6 +24,7 @@ export type LocalGuardian = {
 
 export type StudentInterface = {
   id: string;
+  password: string;
   name: UserName;
   gender: 'male' | 'female';
   dateOfBirth?: string;
@@ -35,4 +38,13 @@ export type StudentInterface = {
   localGuardian: LocalGuardian;
   profileImg?: string;
   isActive: 'active' | 'blocked';
+  isDeleted:boolean;
 };
+
+
+
+// for creating static
+
+export interface StudentModel extends Model<StudentInterface> {
+  isStudentExists(id:string):Promise<StudentInterface | null>
+}

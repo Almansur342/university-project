@@ -1,10 +1,13 @@
 import { model, Schema } from 'mongoose';
+import bcrypt from 'bcrypt';
 import {
   Guardian,
   LocalGuardian,
   StudentInterface,
+  StudentModel,
   UserName,
 } from './student.interface';
+import config from '../config';
 
 const userNameSchema = new Schema<UserName>({
   firstName: {
@@ -66,9 +69,13 @@ const localGuardianSchema = new Schema<LocalGuardian>({
   },
 });
 
-const studentSchema = new Schema<StudentInterface>({
+const studentSchema = new Schema<StudentInterface, StudentModel>({
   id: {
     type: String,
+    required: true,
+  },
+  password:{
+    type:String,
     required: true,
   },
   name: userNameSchema,
@@ -115,6 +122,42 @@ const studentSchema = new Schema<StudentInterface>({
     enum: ['active', 'blocked'],
     required: true,
   },
+  isDeleted:{
+    type:Boolean,
+    default: false,
+  }
 });
 
-export const StudentModel = model<StudentInterface>('Student', studentSchema);
+// pre save middleware/hook
+studentSchema.pre('save', async function(next){
+  //hashing password
+  const student = this; //document, all the data
+ student.password = await bcrypt.hash(student.password,Number(config.bcrypt_salt_round));
+ next();
+})
+
+// post save middleware
+studentSchema.post('save', function(doc,next){
+  doc.password='';
+  next();
+})
+
+studentSchema.pre('find', async function (next) {
+  this.find({isDeleted:{$ne:true}});
+  next();
+});
+
+studentSchema.pre('findOne', async function (next) {
+  this.findOne({isDeleted:{$ne:true}});
+  next();
+})
+
+
+
+//creating a custom static
+studentSchema.statics.isStudentExists = async function (id:string) {
+  const existingStudent = await Student.findOne({id});
+  return existingStudent;
+};
+
+export const Student = model<StudentInterface,StudentModel>('Student', studentSchema);
