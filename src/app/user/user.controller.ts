@@ -1,10 +1,9 @@
-import { NextFunction, Request, Response } from "express";
 import { UserServices } from "./user.services";
 import sendResponse from "./sendResponse";
 import  httpStatus  from "http-status";
+import { cathcAsync } from "../utils/catchAsync";
 
-const createStudent = async (req: Request, res: Response,next: NextFunction) => {
-  try {
+const createStudent = cathcAsync( async (req, res) => {
     const { password, student: studentData } = req.body;
     // const validateData = StudentValidationSchema.parse(studentData);
     const result = await UserServices.createStudentIntoDB(password,studentData);
@@ -15,10 +14,8 @@ const createStudent = async (req: Request, res: Response,next: NextFunction) => 
       message:'Student is created',
       data:result,
     })
-  } catch (err) {
-      next(err)
-    }
-  };
+  }
+)
 
 export const userControllers = {
   createStudent,
